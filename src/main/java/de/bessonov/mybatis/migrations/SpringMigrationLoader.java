@@ -1,7 +1,6 @@
 package de.bessonov.mybatis.migrations;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
 import org.apache.ibatis.migration.Change;
 import org.apache.ibatis.migration.MigrationException;
 import org.apache.ibatis.migration.MigrationLoader;
@@ -111,9 +109,11 @@ public class SpringMigrationLoader implements MigrationLoader {
 
 	protected Reader getReader(String fileName, boolean undo) {
 		try {
-			try (InputStream file = getResource(fileName).getURL().openStream()) {
-				return new MigrationReader(file, charset, undo, properties);
+			Resource scriptResource = getResource(fileName);
+			if (scriptResource.exists()) {
+				return new MigrationReader(scriptResource.getInputStream(), charset, undo, properties);
 			}
+			return null;
 		} catch (IOException e) {
 			throw new MigrationException("Error reading " + fileName, e);
 		}
